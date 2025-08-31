@@ -14,11 +14,13 @@ export class AppComponent {
   @ViewChild('camera_ref') camera_ref!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvas_ref') canvas_ref!: ElementRef<HTMLCanvasElement>;
 
-  public isCameraOn: boolean = true;
+  public isCameraOn: boolean = false;
+  public show_timer_label: boolean = false;
+  public activate_shutter: boolean = false;
+  public show_instruction: boolean = true;
+  public show_generated_picture: boolean = true;
+  public number_of_photos_taken:number = 0;
   public camera_stream!: MediaStream;
-  public show_timer_label = false;
-  public activate_shutter = false;
-  public number_of_photos_taken = 0;
   public camera_native!: HTMLVideoElement;
   public ctx_native!: HTMLCanvasElement;
   public timer!: any;
@@ -28,7 +30,7 @@ export class AppComponent {
   public captured_photos:any = []
 
   ngOnInit(): void {
-    this.init_camera();
+    // this.init_camera();
   }
 
   async init_camera() {

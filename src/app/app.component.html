@@ -1,23 +1,30 @@
 <main class="w-screen h-screen flex justify-center items-center" #main_wrapper_ref>
+    <div class="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 p-6 shadow-lg w-1/2 flex flex-col justify-center items-center">
+      <div class="flex flex-col justify-center items-center">
+        <img class="w-24 h-24" src="../assets/intruction_logo.svg" alt="">
+        <span class="w-[400px] text-white/80 text-center">Step into the photo booth, choose your pose, get ready for the countdown, and smile when the camera clicks!</span>
+      </div>
+    </div>
+
   @if(isCameraOn){
-    <div class="flex items-start justify-between w-full h-full space-x-5">
-      <div class="bg-white shadow-lg rounded-lg w-[20rem] p-5 m-5 flex flex-col space-y-5 items-center justify-center">
-        <span class="text-center text-xl">Photos Taken</span>
-        <span class="text-center text-6xl ">{{number_of_photos_taken}}/{{selected_pose}}</span>
+    <div class="flex items-start justify-between w-full h-full space-x-5 bg-black">
+      <div class="bg-white/10 backdrop-blur-md rounded-xl border border-white/20  shadow-lg w-[20rem] p-5 m-5 flex flex-col space-y-5 items-center justify-center">
+        <span class="text-center text-xl text-white/80">Photos Taken</span>
+        <span class="text-center text-6xl text-white/80">{{number_of_photos_taken}}/{{selected_pose}}</span>
       </div>
       <div class="relative shadow-lg">
        <video class="w-auto h-screen object-cover object-center -scale-x-100 relative" autoplay muted #camera_ref></video>
         <div [ngClass]="{'bg-black': activate_shutter }" class="absolute top-0 w-full h-full flex rounded-md justify-center items-end">
-          <span [ngClass]="{'timer-label': show_timer_label}" class="text-3xl 2xl:text-5xl text-white w-full flex justify-center items-center bg-[#ffffff3d] h-[0px]">{{timer_label}}</span>
+          <span [ngClass]="{'timer-label': show_timer_label}" class="text-3xl 2xl:text-5xl text-white w-full flex justify-center items-center bg-white/10 backdrop-blur-md border border-white/20  shadow-lg h-[0px]">{{timer_label}}</span>
         </div>
       </div>
-      <div class="bg-white shadow-lg rounded-lg w-[20rem] p-5 m-5 flex items-center justify-center">
-        <span class="text-center">Step into the photo booth, choose your pose, get ready for the countdown, and smile when the camera clicks!</span>
+      <div class="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-lg w-[20rem] p-5 m-5 flex items-center justify-center">
+        <span class="text-center text-white/80">Step into the photo booth, choose your pose, get ready for the countdown, and smile when the camera clicks!</span>
       </div>
     </div>
   }
 
-  <div [ngClass]="{'hidden': isCameraOn}" class="w-full h-full flex justify-center items-center">
+  <div [ngClass]="{'hidden': show_generated_picture}" class="w-full h-full flex justify-center items-center">
     <div class="flex justify-center items-center w-full">
       <div class="overflow-hidden rounded-lg bg-white shadow-md scale-[0.7] 2xl:scale-95">
         <canvas class="fadeDown p-5 " width="410" height="630" #canvas_ref></canvas>
