@@ -29,10 +29,12 @@ export class AppComponent {
   public selected_pose = 4;
   public captured_photos:any = []
 
-  ngOnInit(): void {
-    // this.init_camera();
+  start_capturing(){
+    this.show_instruction = false
+    this.isCameraOn = true
+    this.init_camera()
   }
-
+  
   async init_camera() {
     try {
         this.camera_stream = await navigator.mediaDevices.getUserMedia({
@@ -97,6 +99,7 @@ export class AppComponent {
     
     this.number_of_photos_taken += 1
     if(this.number_of_photos_taken === this.selected_pose){
+      this.show_generated_picture = false
       this.generate_framed_photo()
     }
   }
@@ -118,12 +121,12 @@ export class AppComponent {
     ctx_native.height = ctx_height;
 
     if (ctx) {
-      const gradient = ctx.createLinearGradient(0, 0, 0, ctx_native.height);
+      // const gradient = ctx.createLinearGradient(0, 0, 0, ctx_native.height);
 
-      gradient.addColorStop(0, '#041F3C');
-      gradient.addColorStop(1, '#0C55A2');
+      // gradient.addColorStop(0, '#FFFFFF');
+      // gradient.addColorStop(1, '#999999');
 
-      ctx.fillStyle = gradient;
+      ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, ctx_native.width, ctx_native.height);
 
       for (let i = 0; i < this.selected_pose; i++) {
