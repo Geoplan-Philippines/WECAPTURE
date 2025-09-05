@@ -24,10 +24,35 @@ export class AppComponent {
   public camera_native!: HTMLVideoElement;
   public ctx_native!: HTMLCanvasElement;
   public timer!: any;
-  public timer_count: number = 4;
+  public timer_count: number = 1;
   public timer_label: number | string = 'Ready...';
-  public selected_pose = 4;
+  public selected_pose = 3;
   public captured_photos:any = []
+
+  public canvas_bg = new Image()
+  public canvas_logo = new Image()
+  public canvas_engine_1 = new Image()
+  public canvas_engine_2 = new Image()
+  public canvas_headline = new Image()
+  public canvas_subheadline = new Image()
+  public canvas_subheadline_date = new Image()
+  public canvas_footer = new Image()
+
+
+
+
+  constructor(){
+    this.canvas_bg.src = '../assets/Polygon Texture background.svg'
+    this.canvas_logo.src  = '../assets/Geoplan x IoT Con.svg'
+    this.canvas_engine_1.src = '../assets/Gear - Left.svg'
+    this.canvas_engine_2.src = '../assets/Gears - Right.svg'
+    this.canvas_headline.src = '../assets/Resilience for All.svg'
+    this.canvas_subheadline.src = '../assets/Day One.svg'
+    this.canvas_subheadline_date.src = '../assets/Day one -Date.svg'
+    this.canvas_footer.src = '../assets/Footer.svg'
+
+  }
+
 
   start_capturing(){
     this.show_instruction = false
@@ -50,7 +75,7 @@ export class AppComponent {
       
 
       for (let i = 0; i < this.selected_pose; i++) {
-        this.timer_count = 4;
+        this.timer_count = 1;
         setTimeout(() => {
           this.show_timer_label = true;
         }, 500);
@@ -118,17 +143,22 @@ export class AppComponent {
       scaled_height * this.selected_pose + margin * (this.selected_pose + 2);
 
     ctx_native.width = ctx_width;
-    ctx_native.height = ctx_height;
+    ctx_native.height = ctx_height + scaled_height;
 
     if (ctx) {
-      // const gradient = ctx.createLinearGradient(0, 0, 0, ctx_native.height);
 
-      // gradient.addColorStop(0, '#FFFFFF');
-      // gradient.addColorStop(1, '#999999');
-
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, ctx_native.width, ctx_native.height);
-
+      ctx.drawImage(this.canvas_bg, 0,0,this.canvas_bg.width / 6, this.canvas_bg.height / 6)
+      ctx.drawImage(this.canvas_logo, 18, ctx_height - 50,this.canvas_logo.width / 2.3, this.canvas_logo.height / 2.3)
+      ctx.globalAlpha = 0.5
+      ctx.drawImage(this.canvas_engine_1, -80, ctx_height + 10,this.canvas_engine_1.width / 8, this.canvas_engine_1.height / 8)
+      ctx.globalAlpha = 0.5
+      ctx.drawImage(this.canvas_engine_2, 190, ctx_height + 20,this.canvas_engine_2.width / 9, this.canvas_engine_2.height / 9)
+      ctx.globalAlpha = 1
+      ctx.drawImage(this.canvas_headline, 28, ctx_height - 10,this.canvas_headline.width / 4.5, this.canvas_headline.height / 4.5)
+      ctx.drawImage(this.canvas_subheadline, 40, ctx_height + 10,this.canvas_subheadline.width / 6, this.canvas_subheadline.height / 6)
+      ctx.drawImage(this.canvas_subheadline_date, 90, ctx_height + 80,this.canvas_subheadline_date.width / 13, this.canvas_subheadline_date.height / 13)
+      ctx.drawImage(this.canvas_footer, 0, (ctx_height + scaled_height) -18,ctx_native.width, this.canvas_footer.height / 5)
+      
       for (let i = 0; i < this.selected_pose; i++) {
         let x_pos = margin;
         let y_pos = scaled_height * i + margin * (i + 1);
