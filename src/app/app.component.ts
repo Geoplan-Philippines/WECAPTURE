@@ -1,8 +1,10 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { flush } from '@angular/core/testing';
-
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, CommonModule],
@@ -28,6 +30,7 @@ export class AppComponent {
   public timer_label: number | string = 'Ready...';
   public selected_pose = 3;
   public captured_photos:any = []
+  public rendered_qr!: SafeHtml
 
   public canvas_bg = new Image()
   public canvas_logo = new Image()
@@ -39,7 +42,8 @@ export class AppComponent {
   public canvas_footer = new Image()
 
 
-
+  private _http_service = inject(HttpClient)
+  private _html_sanitizer = inject(DomSanitizer)
 
   constructor(){
     this.canvas_bg.src = '../assets/Polygon Texture background.svg'
@@ -98,7 +102,7 @@ export class AppComponent {
         await this.capture_photo();
       }
     } catch (err: any) {
-      alert(err.message);
+      console.log(err.message);
     }
   }
 
@@ -125,12 +129,14 @@ export class AppComponent {
     this.number_of_photos_taken += 1
     if(this.number_of_photos_taken === this.selected_pose){
       this.show_generated_picture = false
-      this.generate_framed_photo()
+      await this.generate_framed_photo()
     }
   }
 
-  generate_framed_photo() {
+  async generate_framed_photo() {
+
     this.isCameraOn = false;
+
     let margin = 20;
     const ctx_native: HTMLCanvasElement = this.canvas_ref.nativeElement;
     const ctx = ctx_native.getContext('2d');
@@ -174,5 +180,14 @@ export class AppComponent {
         );
       }
     }
+
+    const token = Date.now()
+    const qr_svg_data = await firstValueFrom(this._http_service.get(`https://api.tinyqrc.com/v1/qr?data=http://localhost:8081/${token}&size=300`, { responseType: 'text' }))
+    this.rendered_qr = this._html_sanitizer.bypassSecurityTrustHtml(qr_svg_data);
+
+    await firstValueFrom(this._http_service.post('http://localhost:8081/save-image', {
+      token: token,
+      image: ctx_native.toDataURL('image/png')
+    }))
   }
 }

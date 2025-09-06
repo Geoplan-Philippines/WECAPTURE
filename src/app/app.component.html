@@ -103,13 +103,8 @@
         />
       </div>
       <div>
-        <div class="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-lg p-3 ">
-          <img
-            class="w-3xs h-3xs 2xl:w-sm 2xl:h-sm"
-            src="../assets/qr code.png"
-            alt=""
-          />
-        </div>
+        <div [innerHTML]="rendered_qr" class="qr bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-lg p-3 ">
+        </div> 
       </div>
       <span class="bg-white/10 backdrop-blur-md rounded-md p-5 border border-white/20 shadow-lg text-white/80 text-xl 2xl:text-3xl">Get the soft copy, scan me!</span>
     </div>
