@@ -5,6 +5,10 @@ import { flush } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { toPng, toJpeg, toBlob, toPixelData, toSvg} from 'html-to-image';
+import download from 'downloadjs'
+import { RouterLinkActive } from "../../node_modules/@angular/router/router_module.d-Bx9ArA6K";
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, CommonModule],
@@ -13,8 +17,11 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 })
 export class AppComponent {
   @ViewChild('main_wrapper_ref') main_wrapper_ref!: ElementRef<HTMLElement>;
+  @ViewChild('main_canvas_ref') main_canvas_ref!: ElementRef<HTMLElement>;
   @ViewChild('camera_ref') camera_ref!: ElementRef<HTMLVideoElement>;
-  @ViewChild('canvas_ref') canvas_ref!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvas_ref') canvas_ref!: ElementRef<HTMLElement>;
+  @ViewChild('half_canvas_ref') half_canvas_ref!: ElementRef<HTMLElement>;
+
 
   public isCameraOn: boolean = false;
   public show_timer_label: boolean = false;
@@ -26,7 +33,7 @@ export class AppComponent {
   public camera_native!: HTMLVideoElement;
   public ctx_native!: HTMLCanvasElement;
   public timer!: any;
-  public timer_count: number = 1;
+  public timer_count: number = 4;
   public timer_label: number | string = 'Ready...';
   public selected_pose = 3;
   public captured_photos:any = []
@@ -79,7 +86,7 @@ export class AppComponent {
       
 
       for (let i = 0; i < this.selected_pose; i++) {
-        this.timer_count = 1;
+        this.timer_count = 4;
         setTimeout(() => {
           this.show_timer_label = true;
         }, 500);
@@ -133,61 +140,97 @@ export class AppComponent {
     }
   }
 
+
+
   async generate_framed_photo() {
 
     this.isCameraOn = false;
+    const ctx_native: HTMLElement = this.canvas_ref.nativeElement
+    for(let i = 0; i < this.selected_pose; i++) {
+           let scaled_width = this.camera_native.videoWidth / 10;
+            let scaled_height = this.camera_native.videoHeight / 10;
 
-    let margin = 20;
-    const ctx_native: HTMLCanvasElement = this.canvas_ref.nativeElement;
-    const ctx = ctx_native.getContext('2d');
+            const current_img:HTMLImageElement = this.captured_photos[i]
+            current_img.width = scaled_width
+            current_img.height = scaled_height
 
-    let scaled_width = this.camera_native.videoWidth / 3;
-    let scaled_height = this.camera_native.videoHeight / 3;
+          const half_canvas_ref:HTMLElement = this.half_canvas_ref.nativeElement
+          half_canvas_ref.style.width = `${scaled_width + 40}px`
+          ctx_native.append(this.captured_photos[i])  
 
-    let ctx_width = scaled_width + margin * 2;
-    let ctx_height =
-      scaled_height * this.selected_pose + margin * (this.selected_pose + 2);
-
-    ctx_native.width = ctx_width;
-    ctx_native.height = ctx_height + scaled_height;
-
-    if (ctx) {
-
-      ctx.drawImage(this.canvas_bg, 0,0,this.canvas_bg.width / 6, this.canvas_bg.height / 6)
-      ctx.drawImage(this.canvas_logo, 18, ctx_height - 50,this.canvas_logo.width / 2.3, this.canvas_logo.height / 2.3)
-      ctx.globalAlpha = 0.5
-      ctx.drawImage(this.canvas_engine_1, -80, ctx_height + 10,this.canvas_engine_1.width / 8, this.canvas_engine_1.height / 8)
-      ctx.globalAlpha = 0.5
-      ctx.drawImage(this.canvas_engine_2, 190, ctx_height + 20,this.canvas_engine_2.width / 9, this.canvas_engine_2.height / 9)
-      ctx.globalAlpha = 1
-      ctx.drawImage(this.canvas_headline, 28, ctx_height - 10,this.canvas_headline.width / 4.5, this.canvas_headline.height / 4.5)
-      ctx.drawImage(this.canvas_subheadline, 40, ctx_height + 10,this.canvas_subheadline.width / 6, this.canvas_subheadline.height / 6)
-      ctx.drawImage(this.canvas_subheadline_date, 90, ctx_height + 80,this.canvas_subheadline_date.width / 13, this.canvas_subheadline_date.height / 13)
-      ctx.drawImage(this.canvas_footer, 0, (ctx_height + scaled_height) -18,ctx_native.width, this.canvas_footer.height / 5)
-      
-      for (let i = 0; i < this.selected_pose; i++) {
-        let x_pos = margin;
-        let y_pos = scaled_height * i + margin * (i + 1);
-        if (i !== 0) {
-          y_pos = y_pos - (margin / 2) * i;
-        }
-        ctx.drawImage(
-          this.captured_photos[i],
-          x_pos,
-          y_pos,
-          scaled_width,
-          scaled_height
-        );
       }
-    }
 
+    setTimeout(async () => {     
+    const main_cavas_ref:HTMLElement = this.main_canvas_ref.nativeElement
+    const data_url = await toPng(main_cavas_ref)
+      
     const token = Date.now()
-    const qr_svg_data = await firstValueFrom(this._http_service.get(`https://api.tinyqrc.com/v1/qr?data=http://localhost:8081/${token}&size=300`, { responseType: 'text' }))
+    const qr_svg_data = await firstValueFrom(this._http_service.get(`https://api.tinyqrc.com/v1/qr?data=http://172.16.100.147:8081/download-hub/${token}&size=300`, { responseType: 'text' }))
     this.rendered_qr = this._html_sanitizer.bypassSecurityTrustHtml(qr_svg_data);
 
-    await firstValueFrom(this._http_service.post('http://localhost:8081/save-image', {
+    await firstValueFrom(this._http_service.post('http://172.16.100.147:8081/save-image', {
       token: token,
-      image: ctx_native.toDataURL('image/png')
+      image: data_url
     }))
+      
+    }, 1000);
+
+    // let margin = 20;
+    // const ctx_native: HTMLCanvasElement = this.canvas_ref.nativeElement;
+    // const ctx = ctx_native.getContext('2d');
+
+    // let scaled_width = this.camera_native.videoWidth / 14;
+    // let scaled_height = this.camera_native.videoHeight / 14;
+
+    // let ctx_width = scaled_width + margin * 2;
+    // let ctx_height =
+    //   scaled_height * this.selected_pose + margin * (this.selected_pose + 2);
+
+    // ctx_native.width = ctx_width;
+    // ctx_native.height = ctx_height + scaled_height;
+
+    // ctx_native.style.width = '300px'
+
+
+
+    // if (ctx) {
+
+    //   ctx.drawImage(this.canvas_bg, 0,0,this.canvas_bg.width / 6, this.canvas_bg.height / 6)
+    //   ctx.drawImage(this.canvas_logo, 30, ctx_height - 50,this.canvas_logo.width / 2, this.canvas_logo.height / 2)
+    //   ctx.globalAlpha = 0.5
+    //   ctx.drawImage(this.canvas_engine_1, -80, ctx_height + 10,this.canvas_engine_1.width / 8, this.canvas_engine_1.height / 8)
+    //   ctx.globalAlpha = 0.5
+    //   ctx.drawImage(this.canvas_engine_2, 245, ctx_height ,this.canvas_engine_2.width / 8, this.canvas_engine_2.height / 8)
+    //   ctx.globalAlpha = 1
+    //   ctx.drawImage(this.canvas_headline, 55, ctx_height - 10,this.canvas_headline.width / 4.5, this.canvas_headline.height / 4.5)
+    //   ctx.drawImage(this.canvas_subheadline, 65, ctx_height + 5,this.canvas_subheadline.width / 6, this.canvas_subheadline.height / 6)
+    //   ctx.drawImage(this.canvas_subheadline_date, 110, ctx_height + 70,this.canvas_subheadline_date.width / 13, this.canvas_subheadline_date.height / 13)
+    //   ctx.drawImage(this.canvas_footer, 0, (ctx_height + scaled_height) -18,ctx_native.width, this.canvas_footer.height / 5)
+      
+    //   for (let i = 0; i < this.selected_pose; i++) {
+    //     let x_pos = margin;
+    //     let y_pos = scaled_height * i + margin * (i + 1);
+    //     if (i !== 0) {
+    //       y_pos = y_pos - (margin / 2) * i;
+    //     }
+    //     ctx.drawImage(
+    //       this.captured_photos[i],
+    //       x_pos,
+    //       y_pos,
+    //       scaled_width,
+    //       scaled_height
+    //     );
+    //   }
+    // }
+
+
+    // const token = Date.now()
+    // const qr_svg_data = await firstValueFrom(this._http_service.get(`https://api.tinyqrc.com/v1/qr?data=http://172.16.100.147:8081/download-hub/${token}&size=300`, { responseType: 'text' }))
+    // this.rendered_qr = this._html_sanitizer.bypassSecurityTrustHtml(qr_svg_data);
+
+    // await firstValueFrom(this._http_service.post('http://172.16.100.147:8081/save-image', {
+    //   token: token,
+    //   image: ctx_native.toDataURL('image/png')
+    // }))
   }
 }
