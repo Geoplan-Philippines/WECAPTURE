@@ -27,6 +27,7 @@ export class AppComponent {
   public show_timer_label: boolean = false;
   public activate_shutter: boolean = false;
   public show_instruction: boolean = true;
+  public is_generating_qr: boolean = true;
   public show_generated_picture: boolean = true;
   public number_of_photos_taken:number = 0;
   public camera_stream!: MediaStream;
@@ -163,74 +164,17 @@ export class AppComponent {
     setTimeout(async () => {     
     const main_cavas_ref:HTMLElement = this.main_canvas_ref.nativeElement
     const data_url = await toPng(main_cavas_ref)
-      
+    const ip_address = '172.16.100.147'
     const token = Date.now()
-    const qr_svg_data = await firstValueFrom(this._http_service.get(`https://api.tinyqrc.com/v1/qr?data=http://172.16.100.147:8081/download-hub/${token}&size=300`, { responseType: 'text' }))
+    const qr_svg_data = await firstValueFrom(this._http_service.get(`https://api.tinyqrc.com/v1/qr?data=http://${ip_address}:8081/download-hub/${token}&size=300`, { responseType: 'text' }))
     this.rendered_qr = this._html_sanitizer.bypassSecurityTrustHtml(qr_svg_data);
-
-    await firstValueFrom(this._http_service.post('http://172.16.100.147:8081/save-image', {
+    this.is_generating_qr = false
+    
+    await firstValueFrom(this._http_service.post(`http://${ip_address}:8081/save-image`, {
       token: token,
       image: data_url
     }))
       
     }, 1000);
-
-    // let margin = 20;
-    // const ctx_native: HTMLCanvasElement = this.canvas_ref.nativeElement;
-    // const ctx = ctx_native.getContext('2d');
-
-    // let scaled_width = this.camera_native.videoWidth / 14;
-    // let scaled_height = this.camera_native.videoHeight / 14;
-
-    // let ctx_width = scaled_width + margin * 2;
-    // let ctx_height =
-    //   scaled_height * this.selected_pose + margin * (this.selected_pose + 2);
-
-    // ctx_native.width = ctx_width;
-    // ctx_native.height = ctx_height + scaled_height;
-
-    // ctx_native.style.width = '300px'
-
-
-
-    // if (ctx) {
-
-    //   ctx.drawImage(this.canvas_bg, 0,0,this.canvas_bg.width / 6, this.canvas_bg.height / 6)
-    //   ctx.drawImage(this.canvas_logo, 30, ctx_height - 50,this.canvas_logo.width / 2, this.canvas_logo.height / 2)
-    //   ctx.globalAlpha = 0.5
-    //   ctx.drawImage(this.canvas_engine_1, -80, ctx_height + 10,this.canvas_engine_1.width / 8, this.canvas_engine_1.height / 8)
-    //   ctx.globalAlpha = 0.5
-    //   ctx.drawImage(this.canvas_engine_2, 245, ctx_height ,this.canvas_engine_2.width / 8, this.canvas_engine_2.height / 8)
-    //   ctx.globalAlpha = 1
-    //   ctx.drawImage(this.canvas_headline, 55, ctx_height - 10,this.canvas_headline.width / 4.5, this.canvas_headline.height / 4.5)
-    //   ctx.drawImage(this.canvas_subheadline, 65, ctx_height + 5,this.canvas_subheadline.width / 6, this.canvas_subheadline.height / 6)
-    //   ctx.drawImage(this.canvas_subheadline_date, 110, ctx_height + 70,this.canvas_subheadline_date.width / 13, this.canvas_subheadline_date.height / 13)
-    //   ctx.drawImage(this.canvas_footer, 0, (ctx_height + scaled_height) -18,ctx_native.width, this.canvas_footer.height / 5)
-      
-    //   for (let i = 0; i < this.selected_pose; i++) {
-    //     let x_pos = margin;
-    //     let y_pos = scaled_height * i + margin * (i + 1);
-    //     if (i !== 0) {
-    //       y_pos = y_pos - (margin / 2) * i;
-    //     }
-    //     ctx.drawImage(
-    //       this.captured_photos[i],
-    //       x_pos,
-    //       y_pos,
-    //       scaled_width,
-    //       scaled_height
-    //     );
-    //   }
-    // }
-
-
-    // const token = Date.now()
-    // const qr_svg_data = await firstValueFrom(this._http_service.get(`https://api.tinyqrc.com/v1/qr?data=http://172.16.100.147:8081/download-hub/${token}&size=300`, { responseType: 'text' }))
-    // this.rendered_qr = this._html_sanitizer.bypassSecurityTrustHtml(qr_svg_data);
-
-    // await firstValueFrom(this._http_service.post('http://172.16.100.147:8081/save-image', {
-    //   token: token,
-    //   image: ctx_native.toDataURL('image/png')
-    // }))
   }
 }
