@@ -166,11 +166,11 @@ export class AppComponent {
     const data_url = await toPng(main_cavas_ref)
     const ip_address = 'wecapture.fun'
     const token = Date.now()
-    const qr_svg_data = await firstValueFrom(this._http_service.get(`https://api.tinyqrc.com/v1/qr?data=http://${ip_address}/api/download-hub/${token}&size=300`, { responseType: 'text' }))
+    const qr_svg_data = await firstValueFrom(this._http_service.get(`https://api.tinyqrc.com/v1/qr?data=https://${ip_address}/api/download-hub/${token}&size=300`, { responseType: 'text' }))
     this.rendered_qr = this._html_sanitizer.bypassSecurityTrustHtml(qr_svg_data);
     this.is_generating_qr = false
     
-    await firstValueFrom(this._http_service.post(`http://${ip_address}/api/save-image`, {
+    await firstValueFrom(this._http_service.post(`https://${ip_address}/api/save-image`, {
       token: token,
       image: data_url
     }))
