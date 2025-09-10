@@ -158,7 +158,6 @@ export class AppComponent {
           const half_canvas_ref:HTMLElement = this.half_canvas_ref.nativeElement
           half_canvas_ref.style.width = `${scaled_width + 40}px`
           ctx_native.append(this.captured_photos[i])  
-
       }
 
     setTimeout(async () => {     
